@@ -11,6 +11,21 @@ exports.getProducts = (req, res, next) => {
   });
 };
 
+exports.getProduct = (req, res, next) => {
+  const prodId = req.params.productId;
+  console.log(prodId);
+  Product.findById(prodId, product => {
+    console.log(`Controller Product: ${JSON.stringify(product)}`);
+    res.render('shop/product-detail',
+    {
+      product,
+      pageTitle: product.title,
+      path: '/products'
+    }
+    );
+  });
+};
+
 exports.getIndex = (req, res, next) => {
   Product.fetchAll((products) => {
     res.render('shop/index', 
