@@ -15,26 +15,38 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
   const price = req.body.price;
-  const product = new Product(null, title, imageUrl, description, price);
-  product.save().then(() => {
-    res.redirect('/');
-  }).catch(err => console.log(err));
+  Product.create({
+    title: title,
+    imageUrl: imageUrl,
+    description: description,
+    price: price
+  }).then(result => {
+    console.log(result);
+    res.redirect('/admin/products');
+  }).catch(err => {
+    console.log(err);
+  });
   
 };
 
 exports.getEditProduct = (req, res, next) => {
-  Product.findById(req.params.productId, product => {
-    if(!product) {
-      res.status(404).render('404', {pageTitle: 'Page Not Found', path: '/404'});
-    }
-    res.render('admin/edit-product', 
-    {
-      pageTitle: 'Edit Product',
-      path: '/admin/edit-product',
-      editing: true,
-      product: product
-    }); 
-  });
+
+  Product.findByPk(req.params.productId)
+    .then(product => {
+      if(!product) {
+        res.status(404).render('404', {pageTitle: 'Page Not Found', path: '/404'});
+      }
+      res.render('admin/edit-product', 
+      {
+        pageTitle: 'Edit Product',
+        path: '/admin/edit-product',
+        editing: true,
+        product: product
+      }); 
+    })
+    .catch(err => {
+      console.log(err);
+    });
 }
 
 exports.postEditProduct = (req, res, next) => {
@@ -44,18 +56,34 @@ exports.postEditProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
   const price = req.body.price;
-  console.log(`postEditProduct description: ${description}`);
-  const product = new Product(prodId, title, imageUrl, description, price);
-  product.save();
-  res.redirect('/');
+  
+  Product.findByPk(prodId)
+    .then(product => {
+      if(product) {
+        product.title = title;
+        product.imageUrl = imageUrl;
+        product.description = description;
+        product.price = price;
+      }
+      product.save();
+    })
+    .then(result => {
+      console.log('UPDATED PRODUCT!');
+      res.redirect('/');
+    })
+    .catch(err => {
+      console.log(err);
+      res.redirect('/');
+    });
 }
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-  .then( ([rows, fieldData]) => {
+
+  Product.findAll()
+  .then(products => {
     res.render('admin/products', 
     {
-      prods: rows, 
+      prods: products, 
       pageTitle: 'Admin Products',
       path: '/admin/products'
     });
