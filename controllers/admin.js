@@ -15,25 +15,28 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
   const price = req.body.price;
-  Product.create({
+  req.user.createProduct({
     title: title,
     imageUrl: imageUrl,
     description: description,
     price: price
-  }).then(result => {
-    console.log(result);
-    res.redirect('/admin/products');
-  }).catch(err => {
-    console.log(err);
-    res.redirect('/admin/products');
-  });
+  })
+  .then(result => {
+      console.log(result);
+      res.redirect('/admin/products');
+    }).catch(err => {
+      console.log(err);
+      res.redirect('/admin/products');
+    });
   
 };
 
 exports.getEditProduct = (req, res, next) => {
-
-  Product.findByPk(req.params.productId)
-    .then(product => {
+  const prodId = req.params.productId;
+  req.user.getProducts({ where: {id: prodId}})
+  // Product.findByPk(prodId)
+    .then(products => {
+      const product = products[0];
       if(!product) {
         res.status(404).render('404', {pageTitle: 'Page Not Found', path: '/404'});
       }
@@ -79,8 +82,8 @@ exports.postEditProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-
-  Product.findAll()
+  req.user.getProducts()
+  //Product.findAll()
   .then(products => {
     res.render('admin/products', 
     {
