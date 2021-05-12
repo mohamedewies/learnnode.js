@@ -48,22 +48,15 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-
-  req.user.getCart()
-    .then(cart => {
-      console.log(cart);
-      cart.getProducts()
-          .then(cartProducts => {
-            res.render('shop/cart', 
-            {
-              path: '/cart',
-              pageTitle: 'Your Cart',
-              products: cartProducts
-            });
-        })
-        .catch(err => {
-          console.log(err);
-        })
+  req.user
+    .getCart()
+    .then(products => {
+      res.render('shop/cart', 
+      {
+        path: '/cart',
+        pageTitle: 'Your Cart',
+        products: products
+      })
     })
     .catch(err => {
       console.log(err);
